@@ -1,0 +1,4 @@
+Student: Alice_Smith | Average: 84.33
+Student: Carla_Mendez | Average: 91.67
+Student: David_Lee | Average: 57.67 | WARNING
+Student: Eva_Khan | Average: 98.00
