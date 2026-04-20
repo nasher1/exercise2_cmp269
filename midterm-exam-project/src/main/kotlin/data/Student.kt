@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class Student(
     val id: String,
     val name: String,
-    val major: String?,
+    val major: String? = null,
     val accessLevel: Int
 )

@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.plugins.configureStudentDatabase
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
@@ -13,7 +14,7 @@ fun Application.module() {
             ignoreUnknownKeys = true
         })
     }
-    
+
     install(CORS) {
         allowMethod(io.ktor.http.HttpMethod.Get)
         allowMethod(io.ktor.http.HttpMethod.Post)
@@ -21,6 +22,7 @@ fun Application.module() {
         allowMethod(io.ktor.http.HttpMethod.Delete)
         anyHost()
     }
-    
+
+    configureStudentDatabase() 
     configureRouting()
 }

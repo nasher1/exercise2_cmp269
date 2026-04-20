@@ -127,9 +127,9 @@ private fun createIndexHtml(): String {
                         }
                     }
                     
-                    button {
-                        +"Get Student Info & QR Code"
+                    button(type = ButtonType.button) {
                         onClick = "fetchStudentInfo()"
+                        +"Get Student Info & QR Code"
                     }
                     
                     div("info") { id = "studentInfo"; style = "display: none;" }

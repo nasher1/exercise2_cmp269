@@ -40,6 +40,7 @@
             const nameEl = document.getElementById('studentName');
             const qrImg = document.getElementById('qrCode');
 
+
             if (!sid) return;
 
             try {
@@ -58,6 +59,19 @@
             } catch (err) {
                 console.error('Error:', err);
             }
+
+            const response = await fetch(`/api/student/${studentId}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert('Student ID not found! Try: student1, student2, or student3');
+                    return;
+                }
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const student = await response.json();
+
         }
     </script>
 </body>

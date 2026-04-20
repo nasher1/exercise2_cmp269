@@ -1,94 +1,42 @@
 package com.example.routes
 
-import com.example.data.Student
 import com.example.plugins.studentDatabase
 import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.WriterException
+import com.google.zxing.client.j2se.MatrixToImageWriter
 import com.google.zxing.qrcode.QRCodeWriter
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.awt.Color
-import java.awt.Graphics2D
-import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
-import java.util.UUID
 
 fun Route.qrRoutes() {
     get("/generate-id") {
-        val studentId = call.parameters["sid"] ?: return@get call.respondText(
-            "Missing sid parameter", status = io.ktor.http.HttpStatusCode.BadRequest
-        )
-        
-        val student = studentDatabase[studentId] ?: return@get call.respondText(
-            "Student not found", status = io.ktor.http.HttpStatusCode.NotFound
-        )
-        
-        val qrData = generateQRData(student)
-        val qrImage = generateQRWithLogo(qrData)
-        
-        call.respondBytes(qrImage, io.ktor.http.ContentType.Image.PNG)
-    }
-}
+        val sid = call.request.queryParameters["sid"]
 
-private fun generateQRData(student: Student): String {
-    // Encrypt by encoding student data as JSON + UUID salt
-    val encryptedData = mapOf(
-        "salt" to UUID.randomUUID().toString(),
-        "student" to student.copy(
-            major = student.major ?: "Undecided"
-        )
-    )
-    return Json.encodeToString(encryptedData)
-}
-
-private fun generateQRWithLogo(qrData: String): ByteArray {
-    val size = 300
-    val writer = QRCodeWriter()
-    val hints = mapOf(
-        EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.H,
-        EncodeHintType.MARGIN to 1
-    )
-    
-    val bitMatrix = writer.encode(qrData, BarcodeFormat.QR_CODE, size, size, hints)
-    val qrImage = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
-    val qrGraphics = qrImage.createGraphics()
-    
-    // Draw QR code
-    for (x in 0 until size) {
-        for (y in 0 until size) {
-            qrImage.setRGB(x, y, if (bitMatrix[x, y]) 0xFF000000.toInt() else 0xFFFFFFFF.toInt())
+        if (sid.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Missing sid query parameter")
+            return@get
         }
-    }
-    
-    // Add Lehman Lightning bolt logo (simplified as a yellow bolt)
-    val logoSize = 60
-    val logoX = (size - logoSize) / 2
-    val logoY = (size - logoSize) / 2
-    
-    val graphics = qrImage.createGraphics()
-    graphics.color = Color.YELLOW
-    graphics.fillPolygon(
-        intArrayOf(logoX + 30, logoX + 15, logoX + 30, logoX + 45),
-        intArrayOf(logoY + 10, logoY + 25, logoY + 35, logoY + 25),
-        4
-    )
-    graphics.color = Color.ORANGE.darker()
-    graphics.fillPolygon(
-        intArrayOf(logoX + 25, logoX + 20, logoX + 25, logoX + 30),
-        intArrayOf(logoY + 15, logoY + 22, logoY + 28, logoY + 22),
-        4
-    )
-    graphics.dispose()
-    
-    // Convert to PNG bytes
-    ByteArrayOutputStream().use { baos ->
-        ImageIO.write(qrImage, "png", baos)
-        return baos.toByteArray()
+
+        val student = studentDatabase[sid]
+
+        if (student == null) {
+            call.respond(HttpStatusCode.NotFound, "Student with ID '$sid' not found")
+            return@get
+        }
+
+        val qrText = "ID=${student.id};ACCESS=${student.accessLevel}"
+
+        val writer = QRCodeWriter()
+        val bitMatrix = writer.encode(qrText, BarcodeFormat.QR_CODE, 300, 300)
+
+        val outputStream = ByteArrayOutputStream()
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream)
+
+        call.respondBytes(
+            bytes = outputStream.toByteArray(),
+            contentType = ContentType.Image.PNG
+        )
     }
 }
