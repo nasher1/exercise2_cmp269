@@ -10,32 +10,32 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.io.ByteArrayOutputStream
 
+private fun createQrBytes(text: String): ByteArray {
+    val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, 300, 300)
+    val output = ByteArrayOutputStream()
+    MatrixToImageWriter.writeToStream(matrix, "PNG", output)
+    return output.toByteArray()
+}
+
 fun Route.qrRoutes() {
     get("/generate-id") {
         val sid = call.request.queryParameters["sid"]
 
         if (sid.isNullOrBlank()) {
-            call.respond(HttpStatusCode.BadRequest, "Missing sid query parameter")
+            call.respond(HttpStatusCode.BadRequest, "Please provide a student ID.")
             return@get
         }
 
         val student = studentDatabase[sid]
-
         if (student == null) {
-            call.respond(HttpStatusCode.NotFound, "Student with ID '$sid' not found")
+            call.respond(HttpStatusCode.NotFound, "Student not found.")
             return@get
         }
 
-        val qrText = "ID=${student.id};ACCESS=${student.accessLevel}"
-
-        val writer = QRCodeWriter()
-        val bitMatrix = writer.encode(qrText, BarcodeFormat.QR_CODE, 300, 300)
-
-        val outputStream = ByteArrayOutputStream()
-        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream)
+        val qrText = "studentId=${student.id}|name=${student.name}|access=${student.accessLevel}"
 
         call.respondBytes(
-            bytes = outputStream.toByteArray(),
+            bytes = createQrBytes(qrText),
             contentType = ContentType.Image.PNG
         )
     }

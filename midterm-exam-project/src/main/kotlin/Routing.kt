@@ -1,10 +1,10 @@
 package com.example
 
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
+import com.example.routes.qrRoutes
 import com.example.routes.staticRoutes
 import com.example.routes.studentRoutes
-import com.example.routes.qrRoutes
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
