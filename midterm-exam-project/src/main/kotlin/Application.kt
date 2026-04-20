@@ -23,6 +23,6 @@ fun Application.module() {
         anyHost()
     }
 
-    configureStudentDatabase() 
+    configureStudentDatabase()
     configureRouting()
 }

@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.20"
+    kotlin("plugin.serialization") version "1.9.20"
     id("io.ktor.plugin") version "2.3.7"
     application
 }
@@ -21,14 +22,12 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.google.zxing:javase:3.5.3")
     
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.10.1")
-    
     // Logging dependencies
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("org.slf4j:slf4j-api:2.0.9")
     
-    testImplementation("io.ktor:ktor-server-tests-jvm")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("io.ktor:ktor-server-tests-jvm:2.3.7")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.20")
 }
 
 application {
