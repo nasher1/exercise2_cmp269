@@ -13,3 +13,4 @@ fun Application.configureRouting() {
         qrRoutes()
     }
 }
+

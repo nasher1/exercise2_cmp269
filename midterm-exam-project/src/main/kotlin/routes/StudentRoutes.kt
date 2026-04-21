@@ -29,3 +29,4 @@ fun Route.studentRoutes() {
         call.respond(safeStudent)
     }
 }
+
